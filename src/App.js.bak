@@ -1,0 +1,164 @@
+import React, {
+  useEffect,
+  useState,
+} from 'react';
+import './App.css';
+import bankcard from './api/bankcard';
+import repayList from './api/repaylist';
+import couponList from './api/couponlist';
+import user from './api/user';
+import fee from './api/fee';
+
+const isDev = true;
+
+const fetchRepayList = async () => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(repayList)
+    }, 300)
+  })
+}
+
+const fetchBankList = async () => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(bankcard)
+    }, 300)
+  })
+}
+
+const fetchCouponList = async () => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(couponList)
+    }, 300)
+  })
+}
+
+const fetchUser = async () => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(user)
+    }, 300)
+  })
+}
+
+const fetchFee = async () => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(fee)
+    }, 300)
+  })
+}
+
+
+
+
+const App = () => {
+  const [repayList, setRepayList] = useState([])
+  const [couponList, setCoupon] = useState([])
+
+  const onChose = (e, item, i) => {
+    // console.log(`e: `, e)
+    // console.log(`item: `, item)
+    // console.log(`i: `, i)
+    console.log(`repayList: `, repayList)
+    repayList[i].isChecked = !repayList[i].isChecked;
+    // repayList[i].repayAmount = '100';
+    console.log(`repayList[i].isChecked: `, repayList[i].isChecked)
+    setRepayList(repayList);
+  }
+
+  // useEffect(() => {
+  //   setRepayList(repayList);
+  // }, repayList);
+
+
+  // 初始化执行
+  useEffect(() => {
+
+    if(isDev){
+      // 信息写死
+      fetchUser().then(res => {
+        // console.log(`fetchUser res: `, res)
+        window.localStorage.setItem('__user__', JSON.stringify(res))
+      })
+    }else {
+      // 异步从`sdk`获取用户信息
+      fetchUser().then(res => {
+        // console.log(`fetchUser res: `, res)
+      })
+    }
+
+    // 还款列表
+    fetchRepayList().then(res => {
+      console.log(`fetchRepayList res: `, res)
+      let {data} = res;
+      let {list} = data;
+      list.forEach(item => {
+        item.isChecked = true;
+      })
+      console.log(`fetchRepayList list: `, list)
+      setRepayList(list);
+    })
+
+    // 银行卡
+    fetchBankList().then(res => {
+      console.log(`fetchBankList res: `, res)
+    })
+
+    // 优惠券
+    fetchCouponList().then(res => {
+      console.log(`fetchCouponList res: `, res)
+      let {data} = res;
+      let {list} = data;
+      list = [{
+        couponRecordId: 9999999999999999999999
+      }].concat(list);
+      setCoupon(list);
+    })
+
+    // 支付宝还款费
+    fetchFee().then(res => {
+      console.log(`fetchFee res: `, res)
+    })
+
+  }, [])
+
+  console.log(`======================================================`);
+
+  return <div className={`App`}>
+    <h3 className={`title`}>列表</h3>
+    <ul className={`repay-list`}>
+      {repayList.map((item, i) => {
+        console.log(`item: `, item.isChecked);
+        return <li key={i} className={`item`} onClick={(e) => onChose(e, item, i)}>
+          <input type="checkbox" name={`repay-list` + i} checked={item.isChecked} onChange={(e) => onChose(e, item, i)}/>
+          之前借了 {item.borrowAmount} 元
+          本期应还 {item.repayAmount} 元
+        </li>
+      })}
+    </ul>
+
+    <ul className={`coupon`}>
+      {
+        couponList.map((coupon, i) => {
+          console.log(`i: `, i);
+          return <li key={coupon.couponRecordId}>
+              { i === 0 ? '不适用优惠' : coupon.applyScopeName }
+          </li>
+        })
+      }
+    </ul>
+
+    <ul>
+      {countArr}
+      <button onClick={() => handleChange(countArr)}> + </button>
+    </ul>
+
+  </div>
+}
+
+
+
+export default App;
