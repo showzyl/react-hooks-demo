@@ -1,98 +1,51 @@
 import React, {
   useEffect,
   useState,
+  useRef
 } from 'react';
 import './App.css';
 
+window.React = React
 
+// import axios from 'axios';
 
-let uid = 0;
-const App = () => {
+// import React, { useState, useEffect, useRef } from "react";
+// import ReactDOM from "react-dom";
 
-  const [text, setText] = useState('');
-  const [todos, setTodo] = useState([]);
+function Counter() {
+  const [count, setCount] = useState(0);
 
-  const onChangeTxt = (e) => {
-    setText(e.target.value.trim());
-  }
+  useInterval(() => {
+    // Your custom logic here
+    setCount(count + 1);
+  }, 1000);
 
-  const onSubmitTxt = (e) => {
-    let text = e.target.value.trim();
-    if(!text) return;
-    if (e.which === 13 && text) {
-      setTodo([
-        ...todos, {
-          text,
-          isChecked: false,
-          uid: uid++
-        }
-      ])
-      setText('')
-    }
-  }
-
-  const onClickChecked = (e, todo) => {
-    let res = todos.map(item => {
-      if(item.uid === todo.uid) item.isChecked = !todo.isChecked;
-      return item;
-    })
-    setTodo(res);
-  }
-
-  const onDelete = (e, todo) => {
-    console.log(`todo: `, todo)
-    let resArr = todos.filter(item => item.uid !== todo.uid);
-    // console.log(`todos: `, todos);
-    setTodo(resArr);
-  }
-
-  // 初始化执行
-  useEffect(() => {
-
-  }, [])
-
-  console.log(`======================================================`);
-
-  console.log(`todos: `, todos)
-  return <div className={`App`}>
-
-    <header className="header">
-      <h1>TodoMVC</h1>
-      <input type="text"
-             value={text}
-             className="new-todo"
-             placeholder={`please input value...`}
-             onKeyUp={(e) => onSubmitTxt(e)}
-             onChange={(e) => onChangeTxt(e)}/>
-    </header>
-
-    <section className="main">
-      <span>
-        <input className="toggle-all" type="checkbox" readOnly="" />
-        <label />
-      </span>
-
-      <ul className={`todo-list`}>
-        {
-          todos && todos.map(todo => {
-            console.log(`todo.isChecked: `, todo.isChecked)
-            return <li key={todo.uid}
-                       className={todo.isChecked ? 'completed' : ''}
-                       att-key={todo.uid}>
-              <input type="checkbox" className={`toggle`}
-                     onChange={(e) => onClickChecked(e, todo)}/>
-              <label>
-                {todo.text}
-              </label>
-              <button className={`destroy`} onClick={(e) => onDelete(e, todo)} />
-            </li>
-          })
-        }
-      </ul>
-    </section>
-  </div>
-
+  return <h1>{count}</h1>;
 }
 
+function useInterval(callback, delay) {
+  const savedCallback = useRef();
+  console.log(`savedCallback: `, savedCallback)
 
-export default App;
+  // Remember the latest function.
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  // Set up the interval.
+  useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+    if (delay !== null) {
+      let id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
+
+// const rootElement = document.getElementById("root");
+// ReactDOM.render(<Counter />, rootElement);
+
+
+export default Counter;
